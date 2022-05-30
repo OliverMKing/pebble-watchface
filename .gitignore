@@ -34,3 +34,6 @@
 # npm dependencies
 node_modules/
 
+# built pebble
+build/
+.lock-*
