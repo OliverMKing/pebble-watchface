@@ -4,12 +4,27 @@ Forked from https://github.com/clach04/pebble_watchface_framework
 
 ## Developing
 
+Commands to help with developing. Run them inside this directory.
+
 ### Windows
 
 Build
 
 ```sh
 docker run -it -v //$(PWD)/:/pebble/ bboehmke/pebble-dev pebble build
+```
+
+Screen emulator (requires [Windows X-server](https://sourceforge.net/projects/vcxsrv/) with disabled access control)
+
+```sh
+docker run -e DISPLAY=host.docker.internal:0.0 -it -v //$(PWD)/:/pebble/ bboehmke/pebble-dev
+```
+
+then run
+
+```sh
+pebble install --emulator basalt --logs # emulator aplite, basalt, or chalk
+pebble install -v
 ```
 
 ## Additional options
