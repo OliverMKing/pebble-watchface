@@ -17,6 +17,10 @@
 #define BAT_FMT_STR "%d%%"
 #define DRAW_SMALL_BATTERY
 
+#define DATE_FMT_STR "%A, %d %b"  
+#define MAX_DATE_STR "Thursday, 00 Aug"  /* if custom version of DATE_FMT_STR is set, MAX_DATE_STR  needs to be updated too */
+
+
 //#define QUIET_TIME_IMAGE RESOURCE_ID_IMAGE_QUIET_TIME
 //#define QUIET_TIME_IMAGE_GRECT GRect(20, 20, 20, 20)  // Example assumes a 20x20 image
 
