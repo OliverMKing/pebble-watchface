@@ -1,37 +1,43 @@
 {
-    "author": "clach04",
-    "dependencies": {
-        "pebble-clay": "^1.0.1"
-    },
-    "keywords": [],
-    "name": "fill-me-in",
-    "pebble": {
-        "capabilities": [
-            "configurable"
-        ],
-        "displayName": "FILL ME IN!",
-        "enableMultiJS": true,
-        "messageKeys": [
-            "TIME_COLOR",
-            "VIBRATE_ON_DISCONNECT",
-            "BACKGROUND_COLOR",
-            "MAJOR_VERSION"
-        ],
-        "projectType": "native",
-        "resources": {
-            "media": []
-        },
-        "sdkVersion": "3",
-        "targetPlatforms": [
-            "aplite",
-            "basalt",
-            "chalk",
-            "diorite"
-        ],
-        "uuid": "33a003e9-91ec-40fe-b652-b41248212f74",
-        "watchapp": {
-            "watchface": true
+  "author": "clach04",
+  "dependencies": {
+    "pebble-clay": "^1.0.1"
+  },
+  "keywords": [],
+  "name": "hourly-slideshow",
+  "pebble": {
+    "capabilities": [
+      "configurable"
+    ],
+    "displayName": "slideshow",
+    "enableMultiJS": true,
+    "messageKeys": [
+      "TIME_COLOR",
+      "VIBRATE_ON_DISCONNECT",
+      "BACKGROUND_COLOR",
+      "MAJOR_VERSION"
+    ],
+    "projectType": "native",
+    "resources": {
+      "media": [
+        {
+          "file": "images/background1.png",
+          "name": "IMAGE_BG1",
+          "type": "png"
         }
+      ]
     },
-    "version": "1.0.0"
+    "sdkVersion": "3",
+    "targetPlatforms": [
+      "aplite",
+      "basalt",
+      "chalk",
+      "diorite"
+    ],
+    "uuid": "33a003e9-91ec-40fe-b652-b41248212f74",
+    "watchapp": {
+      "watchface": true
+    }
+  },
+  "version": "1.0.0"
 }

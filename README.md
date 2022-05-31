@@ -2,7 +2,11 @@
 
 Forked from https://github.com/clach04/pebble_watchface_framework
 
+Watchface that switches the background image every hour.
+
 ## Developing
+
+Create a `resources/images` folder and put your background images inside them. Add images to the resources part of `package.json`.
 
 Commands to help with developing. Run them inside this directory.
 
@@ -23,8 +27,8 @@ docker run -e DISPLAY=host.docker.internal:0.0 -it -v //$(PWD)/:/pebble/ bboehmk
 then run
 
 ```sh
+pebble build
 pebble install --emulator basalt --logs # emulator aplite, basalt, or chalk
-pebble install -v
 ```
 
 ## Additional options

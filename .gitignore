@@ -37,3 +37,4 @@ node_modules/
 # built pebble
 build/
 .lock-*
+resources/images

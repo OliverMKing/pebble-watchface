@@ -7,8 +7,10 @@
 #undef DEBUG_TIME
 //#define USE_TIME_MACHINE  // NOTE mixing with DEBUG_TIME doesn't make sense. Requires update to package.json for dependencies
 
+#define BG_IMAGE RESOURCE_ID_IMAGE_BG1
+
 // Show step count using builtin code
-#define USE_HEALTH
+// #define USE_HEALTH
 //#define UPDATE_HEALTH_ON_ACTIVITY  /* If not set, only updates step count display once per minute */
 
 #define DRAW_BATTERY
