@@ -14,6 +14,7 @@
 //#define UPDATE_HEALTH_ON_ACTIVITY  /* If not set, only updates step count display once per minute */
 
 //#define DRAW_BATTERY
+#define BAT_FMT_STR "%d%%"
 #define DRAW_SMALL_BATTERY
 
 //#define QUIET_TIME_IMAGE RESOURCE_ID_IMAGE_QUIET_TIME
