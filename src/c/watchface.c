@@ -1,65 +1,63 @@
 #include <pebble.h>
-#include <pebble_process_info.h>  // ONLY for get_major_app_version()
-extern const PebbleProcessInfo __pbl_app_info;  // ONLY for get_major_app_version()
-    
+#include <pebble_process_info.h>               // ONLY for get_major_app_version()
+extern const PebbleProcessInfo __pbl_app_info; // ONLY for get_major_app_version()
+
 #ifdef USE_SHADOW_TIME_EFFECT
-#include "effect_layer.h"  /* from https://github.com/ygalanter/EffectLayer */
-#endif /* USE_SHADOW_TIME_EFFECT */
+#include "effect_layer.h" /* from https://github.com/ygalanter/EffectLayer */
+#endif                    /* USE_SHADOW_TIME_EFFECT */
 
 #include "watchface.h"
 
-
 #ifdef PBL_BW
-    #ifndef GColorFromHEX
-        /* Pre SDk 3.8 */
-        #define GColorFromHEX(int_color) int_color == 0 ? GColorBlack : GColorWhite
-    #endif /* GColorFromHEX */
+#ifndef GColorFromHEX
+/* Pre SDk 3.8 */
+#define GColorFromHEX(int_color) int_color == 0 ? GColorBlack : GColorWhite
+#endif /* GColorFromHEX */
 #endif /* PBL_BW */
 
-Window    *main_window=NULL;
+Window *main_window = NULL;
 #ifndef NO_TEXT_TIME_LAYER
-TextLayer *time_layer=NULL;
+TextLayer *time_layer = NULL;
 #endif /* NO_TEXT_TIME_LAYER */
 
-TextLayer *date_layer=NULL;
+TextLayer *date_layer = NULL;
 #ifndef DRAW_BATTERY
-TextLayer *battery_layer=NULL;
+TextLayer *battery_layer = NULL;
 #else
-Layer *battery_layer=NULL;
-    #ifdef DRAW_SMALL_BATTERY
-        const GPathInfo battery_path_info={ .num_points = 14, .points = ((GPoint[]){{0,6},{0,0},{10,0},{10,2},{11,2},{11,4},{10,4},{10,6},{0,6},{1,5},{9,5},{9,1},{1,1},{1,5}}) };
-    #else
-        const GPathInfo battery_path_info={ .num_points = 15, .points = ((GPoint[]){{0,10},{0,0},{20,0},{20,4},{22,4},{22,8},{20,8},{20,12},{0,12},{0,10},{2,10},{18,10},{18,2},{2,2},{2,10}}) };
-    #endif /* DRAW_SMALL_BATTERY */
-GPath *battery_path=NULL;
+Layer *battery_layer = NULL;
+#ifdef DRAW_SMALL_BATTERY
+const GPathInfo battery_path_info = {.num_points = 14, .points = ((GPoint[]){{0, 6}, {0, 0}, {10, 0}, {10, 2}, {11, 2}, {11, 4}, {10, 4}, {10, 6}, {0, 6}, {1, 5}, {9, 5}, {9, 1}, {1, 1}, {1, 5}})};
+#else
+const GPathInfo battery_path_info = {.num_points = 15, .points = ((GPoint[]){{0, 10}, {0, 0}, {20, 0}, {20, 4}, {22, 4}, {22, 8}, {20, 8}, {20, 12}, {0, 12}, {0, 10}, {2, 10}, {18, 10}, {18, 2}, {2, 2}, {2, 10}})};
+#endif /* DRAW_SMALL_BATTERY */
+GPath *battery_path = NULL;
 #endif /* DRAW_BATTERY */
-GColor     battery_color;
-TextLayer *bluetooth_tlayer=NULL;
-TextLayer *health_tlayer=NULL;
+GColor battery_color;
+TextLayer *bluetooth_tlayer = NULL;
+TextLayer *health_tlayer = NULL;
 
-GFont       time_font;
+GFont time_font;
 #ifdef BG_IMAGE
-BitmapLayer *background_layer=NULL;
-GBitmap     *background_bitmap=NULL;
+BitmapLayer *background_layer = NULL;
+GBitmap *background_bitmap = NULL;
 #endif /* BG_IMAGE */
 #ifdef BT_DISCONNECT_IMAGE
-BitmapLayer *bluetooth_blayer=NULL;
-GBitmap     *bluetooth_disconnect_bitmap=NULL;
+BitmapLayer *bluetooth_blayer = NULL;
+GBitmap *bluetooth_disconnect_bitmap = NULL;
 #endif /* BT_DISCONNECT_IMAGE */
 /* For colors, see http://developer.getpebble.com/tools/color-picker/#0000FF */
-GColor       time_color;  /* NOTE used for date too */
-GColor       background_color;
-int          config_time_color;
-int          config_background_color;
-bool         config_time_vib_on_disconnect = false;
+GColor time_color; /* NOTE used for date too */
+GColor background_color;
+int config_time_color;
+int config_background_color;
+bool config_time_vib_on_disconnect = false;
 static int major_version = 0;
-
 
 int last_day = -1;
 bool bluetooth_state = false;
 
 #ifdef DEBUG_TIME
-char * debug_time_list[] = {
+char *debug_time_list[] = {
     "00:00",
     "01:01",
     "01:23",
@@ -81,22 +79,20 @@ char * debug_time_list[] = {
     /* 12 hour format withOUT leading zero, with  space */
     " 1:01",
     " 8:55",
-    NULL
-};
+    NULL};
 #endif /* DEBUG_TIME */
 
 /* TODO resequence? */
 void setup_bt_image(Window *window, uint32_t resource_id, GRect bounds);
 void cleanup_bt_image();
 
-
 #ifdef USE_SHADOW_TIME_EFFECT
-static EffectLayer* effect_layer=NULL;
+static EffectLayer *effect_layer = NULL;
 static EffectOffset effect_offset;
 
 void setup_effects(Window *window)
 {
-    //effect_layer = effect_layer_create(GRect(0, 0, 144, 168)); // will cover entire screen
+    // effect_layer = effect_layer_create(GRect(0, 0, 144, 168)); // will cover entire screen
     effect_layer = effect_layer_create(CLOCK_POS);
 
     effect_offset.orig_color = time_color;
@@ -106,11 +102,11 @@ void setup_effects(Window *window)
 
     effect_layer_add_effect(effect_layer, effect_outline, &effect_offset);
     /* Other effect examples */
-    //effect_layer_add_effect(effect_layer, effect_shadow, &effect_offset);
+    // effect_layer_add_effect(effect_layer, effect_shadow, &effect_offset);
 
-    //effect_layer_add_effect(effect_layer, effect_invert, NULL);
-    //effect_layer_add_effect(effect_layer, effect_invert_bw_only, NULL);
-    //effect_layer_add_effect(effect_layer, effect_rotate_90_degrees, (void *)true); // rotates 90 degrees counterclockwise
+    // effect_layer_add_effect(effect_layer, effect_invert, NULL);
+    // effect_layer_add_effect(effect_layer, effect_invert_bw_only, NULL);
+    // effect_layer_add_effect(effect_layer, effect_rotate_90_degrees, (void *)true); // rotates 90 degrees counterclockwise
 
     layer_add_child(window_get_root_layer(window), effect_layer_get_layer(effect_layer));
 }
@@ -126,29 +122,29 @@ void cleanup_effects()
 
 void handle_bluetooth(bool connected)
 {
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "%s() bluetooth status %d", __func__, (int) connected);
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "%s() bluetooth status %d", __func__, (int)connected);
     /* TODO use gfx not text */
     if (connected)
     {
         APP_LOG(APP_LOG_LEVEL_DEBUG, "%s() bluetooth connected", __func__);
-        #ifdef BT_DISCONNECT_IMAGE
-            bitmap_layer_set_bitmap(bluetooth_blayer, NULL); /* Show nothing */
-            /*
-            ** alternative is layer_set_hidden()
-            **  https://developer.getpebble.com/docs/c/User_Interface/Layers/#layer_set_hidden
-            */
-        #else /* BT_DISCONNECT_IMAGE */
-            text_layer_set_text(bluetooth_tlayer, "");
-        #endif /* BT_DISCONNECT_IMAGE */
+#ifdef BT_DISCONNECT_IMAGE
+        bitmap_layer_set_bitmap(bluetooth_blayer, NULL); /* Show nothing */
+                                                         /*
+                                                         ** alternative is layer_set_hidden()
+                                                         **  https://developer.getpebble.com/docs/c/User_Interface/Layers/#layer_set_hidden
+                                                         */
+#else                                                    /* BT_DISCONNECT_IMAGE */
+        text_layer_set_text(bluetooth_tlayer, "");
+#endif                                                   /* BT_DISCONNECT_IMAGE */
     }
     else
     {
         APP_LOG(APP_LOG_LEVEL_DEBUG, "%s() bluetooth DISconnected", __func__); // TODO open issue with Pebble - Why is this NOT showing up in debug log? Presumbly as BT is needed even in emulator and logging is thrown away without connection?
-        #ifdef BT_DISCONNECT_IMAGE
-            bitmap_layer_set_bitmap(bluetooth_blayer, bluetooth_disconnect_bitmap);
-        #else /* BT_DISCONNECT_IMAGE */
-            text_layer_set_text(bluetooth_tlayer, BLUETOOTH_DISCONNECTED_STR);
-        #endif /* BT_DISCONNECT_IMAGE */
+#ifdef BT_DISCONNECT_IMAGE
+        bitmap_layer_set_bitmap(bluetooth_blayer, bluetooth_disconnect_bitmap);
+#else  /* BT_DISCONNECT_IMAGE */
+        text_layer_set_text(bluetooth_tlayer, BLUETOOTH_DISCONNECTED_STR);
+#endif /* BT_DISCONNECT_IMAGE */
         if (config_time_vib_on_disconnect && (bluetooth_state != connected))
         {
             bool do_vib = true;
@@ -178,22 +174,21 @@ void handle_bluetooth(bool connected)
             /* had BT connection then lost it, rather than started disconnected */
             if (do_vib)
             {
-                vibes_short_pulse();  /* vibrate/rumble */
+                vibes_short_pulse(); /* vibrate/rumble */
             }
         }
     }
     bluetooth_state = connected;
 }
 
-
 void setup_bluetooth(Window *window)
 {
 #ifdef BT_DISCONNECT_IMAGE
-    #ifdef BT_DISCONNECT_IMAGE_GRECT
-        setup_bt_image(window, BT_DISCONNECT_IMAGE, BT_DISCONNECT_IMAGE_GRECT);
-    #else /* BT_DISCONNECT_IMAGE_GRECT */
-        setup_bt_image(window, BT_DISCONNECT_IMAGE, GRectZero);
-    #endif /* BT_DISCONNECT_IMAGE_GRECT */
+#ifdef BT_DISCONNECT_IMAGE_GRECT
+    setup_bt_image(window, BT_DISCONNECT_IMAGE, BT_DISCONNECT_IMAGE_GRECT);
+#else  /* BT_DISCONNECT_IMAGE_GRECT */
+    setup_bt_image(window, BT_DISCONNECT_IMAGE, GRectZero);
+#endif /* BT_DISCONNECT_IMAGE_GRECT */
 #else
     /* text */
     bluetooth_tlayer = text_layer_create(BT_POS);
@@ -224,32 +219,32 @@ void cleanup_bluetooth()
 static void health_handler(HealthEventType event, void *context)
 {
     // Which type of event occured?
-    switch(event)
+    switch (event)
     {
-        case HealthEventSignificantUpdate:
-            APP_LOG(APP_LOG_LEVEL_INFO, "New HealthService HealthEventSignificantUpdate event");
-            //break;
-        case HealthEventMovementUpdate:
-            APP_LOG(APP_LOG_LEVEL_INFO, "New HealthService HealthEventMovementUpdate event");
-            update_health();
-            break;
-        case HealthEventSleepUpdate:
-            APP_LOG(APP_LOG_LEVEL_INFO, "New HealthService HealthEventSleepUpdate event");
-            break;
+    case HealthEventSignificantUpdate:
+        APP_LOG(APP_LOG_LEVEL_INFO, "New HealthService HealthEventSignificantUpdate event");
+        // break;
+    case HealthEventMovementUpdate:
+        APP_LOG(APP_LOG_LEVEL_INFO, "New HealthService HealthEventMovementUpdate event");
+        update_health();
+        break;
+    case HealthEventSleepUpdate:
+        APP_LOG(APP_LOG_LEVEL_INFO, "New HealthService HealthEventSleepUpdate event");
+        break;
 #if PBL_API_EXISTS(health_service_register_metric_alert)
-        case HealthEventMetricAlert:
-            APP_LOG(APP_LOG_LEVEL_INFO, "New HealthService HealthEventMetricAlert event");
-            break;
-#endif  // HealthEventMetricAlert
+    case HealthEventMetricAlert:
+        APP_LOG(APP_LOG_LEVEL_INFO, "New HealthService HealthEventMetricAlert event");
+        break;
+#endif // HealthEventMetricAlert
 #if PBL_API_EXISTS(health_service_set_heart_rate_sample_period)
-        case HealthEventHeartRateUpdate:
-            APP_LOG(APP_LOG_LEVEL_INFO, "New HealthService HealthEventHeartRateUpdate event");
-            break;
+    case HealthEventHeartRateUpdate:
+        APP_LOG(APP_LOG_LEVEL_INFO, "New HealthService HealthEventHeartRateUpdate event");
+        break;
 #endif // HealthEventHeartRateUpdate
-        // Default is not a good idea, but get switch warnings (about heart events) without it on Basalt/Chalk SDK4 builds
-        default:
-            APP_LOG(APP_LOG_LEVEL_INFO, "New HealthService UNHANDLED event");
-            break;
+       // Default is not a good idea, but get switch warnings (about heart events) without it on Basalt/Chalk SDK4 builds
+    default:
+        APP_LOG(APP_LOG_LEVEL_INFO, "New HealthService UNHANDLED event");
+        break;
     }
 }
 
@@ -264,7 +259,7 @@ void setup_health(Window *window)
     text_layer_set_text(health_tlayer, "");
 
 #ifdef UPDATE_HEALTH_ON_ACTIVITY
-    if(!health_service_events_subscribe(health_handler, NULL))
+    if (!health_service_events_subscribe(health_handler, NULL))
     {
         APP_LOG(APP_LOG_LEVEL_ERROR, "Health not available!");
     }
@@ -277,16 +272,16 @@ void update_health()
     static char buffer[] = MAX_HEALTH_STR;
 
     time_t start = time_start_of_today();
-    time_t end = time(NULL);  /* Now */
+    time_t end = time(NULL); /* Now */
 
     /* Check data is available */
     HealthServiceAccessibilityMask result = health_service_metric_accessible(HealthMetricStepCount, start, end);
-    if(result & HealthServiceAccessibilityMaskAvailable)
+    if (result & HealthServiceAccessibilityMaskAvailable)
     {
         HealthValue steps = health_service_sum(HealthMetricStepCount, start, end);
 
         APP_LOG(APP_LOG_LEVEL_INFO, "Steps today: %d", (int)steps);
-        snprintf(buffer, sizeof(buffer), HEALTH_FMT_STR, (int) steps);
+        snprintf(buffer, sizeof(buffer), HEALTH_FMT_STR, (int)steps);
     }
     else
     {
@@ -304,8 +299,9 @@ void cleanup_health()
 #endif /* PBL_HEALTH */
 /*****************/
 
-void handle_battery(BatteryChargeState charge_state) {
-    battery_color=time_color;
+void handle_battery(BatteryChargeState charge_state)
+{
+    battery_color = time_color;
 #ifndef DRAW_BATTERY
     static char battery_text[] = MAX_BAT_STR;
 #endif /* DRAW_BATTERY */
@@ -343,9 +339,9 @@ void handle_battery(BatteryChargeState charge_state) {
 #ifdef DRAW_BATTERY
 void update_battery_proc(Layer *layer, GContext *ctx)
 {
-    int pos_x=BAT_POS.origin.x;
-    int pos_y=BAT_POS.origin.y;
-    BatteryChargeState state=battery_state_service_peek();
+    int pos_x = BAT_POS.origin.x;
+    int pos_y = BAT_POS.origin.y;
+    BatteryChargeState state = battery_state_service_peek();
 
     graphics_context_set_fill_color(ctx, battery_color);
     graphics_context_set_stroke_color(ctx, battery_color);
@@ -368,7 +364,7 @@ void setup_battery(Window *window)
     Layer *window_layer = window_get_root_layer(window);
     GRect bounds = layer_get_bounds(window_layer);
 
-    battery_layer = layer_create(bounds);  // TODO BAT_POS - instead
+    battery_layer = layer_create(bounds); // TODO BAT_POS - instead
     battery_path = gpath_create(&battery_path_info);
     layer_set_update_proc(battery_layer, update_battery_proc);
     layer_add_child(window_layer, battery_layer); //??
@@ -397,8 +393,8 @@ void cleanup_battery()
 }
 
 #ifdef QUIET_TIME_IMAGE
-BitmapLayer *quiet_time_blayer=NULL;
-GBitmap     *quiet_time_bitmap=NULL;
+BitmapLayer *quiet_time_blayer = NULL;
+GBitmap *quiet_time_bitmap = NULL;
 
 void handle_quiet_time(void)
 {
@@ -424,12 +420,12 @@ void setup_quiet_time(Window *window)
     APP_LOG(APP_LOG_LEVEL_DEBUG, "%s() entry", __func__);
     quiet_time_bitmap = gbitmap_create_with_resource(QUIET_TIME_IMAGE);
 
-    #ifdef QUIET_TIME_IMAGE_GRECT
-        bounds = QUIET_TIME_IMAGE_GRECT;
-    #else // QUIET_TIME_IMAGE_GRECT
-        // use whole watch screen, auto centered
-        bounds = layer_get_bounds(window_get_root_layer(window));
-    #endif // QUIET_TIME_IMAGE_GRECT
+#ifdef QUIET_TIME_IMAGE_GRECT
+    bounds = QUIET_TIME_IMAGE_GRECT;
+#else  // QUIET_TIME_IMAGE_GRECT
+    // use whole watch screen, auto centered
+    bounds = layer_get_bounds(window_get_root_layer(window));
+#endif // QUIET_TIME_IMAGE_GRECT
 
     APP_LOG(APP_LOG_LEVEL_DEBUG, "%s() bounds x=%d, y=%d, w=%d, h=%d", __func__, bounds.origin.x, bounds.origin.y, bounds.size.w, bounds.size.h);
     quiet_time_blayer = bitmap_layer_create(bounds);
@@ -459,7 +455,6 @@ void cleanup_quiet_time(void)
 }
 #endif // QUIET_TIME_IMAGE
 
-
 #ifndef NO_TEXT_TIME_LAYER
 void setup_text_time(Window *window)
 {
@@ -485,8 +480,9 @@ void cleanup_text_time()
 }
 #endif /* NO_TEXT_TIME_LAYER */
 
-void update_date(struct tm *tick_time) {
-    static char buffer[] = MAX_DATE_STR;  /* TODO use same buffer, one for both date and time? */
+void update_date(struct tm *tick_time)
+{
+    static char buffer[] = MAX_DATE_STR; /* TODO use same buffer, one for both date and time? */
 
     last_day = tick_time->tm_mday;
     strftime(buffer, sizeof(buffer), DATE_FMT_STR, tick_time);
@@ -604,27 +600,27 @@ void cleanup_bt_image()
 }
 #endif /* BT_DISCONNECT_IMAGE_GRECT */
 
-
 #ifndef NO_TEXT_TIME_LAYER
-void update_time(struct tm *tick_time) {
+void update_time(struct tm *tick_time)
+{
     // Create a long-lived buffer
     static char buffer[] = MAX_TIME_STR;
 
 #ifdef DEBUG_TIME
     {
-        static int     str_counter=0;
+        static int str_counter = 0;
 
-        #ifdef DEBUG_TIME_SCREENSHOT
-            strcpy(buffer, debug_time_list[3]);
-            light_enable(true);  // mostly for emulator
-        #else
-            strcpy(buffer, debug_time_list[str_counter]);
-            str_counter++;
-            if (debug_time_list[str_counter] == NULL)
-            {
-                str_counter = 0;
-            }
-        #endif /* DEBUG_TIME_SCREENSHOT */
+#ifdef DEBUG_TIME_SCREENSHOT
+        strcpy(buffer, debug_time_list[3]);
+        light_enable(true); // mostly for emulator
+#else
+        strcpy(buffer, debug_time_list[str_counter]);
+        str_counter++;
+        if (debug_time_list[str_counter] == NULL)
+        {
+            str_counter = 0;
+        }
+#endif /* DEBUG_TIME_SCREENSHOT */
     }
 #else
     {
@@ -633,10 +629,13 @@ void update_time(struct tm *tick_time) {
         ** https://developer.getpebble.com/docs/c/Foundation/Wall_Time/
         */
         // Write the current hours and minutes into the buffer
-        if(clock_is_24h_style() == true) {
+        if (clock_is_24h_style() == true)
+        {
             // 24h hour format
             strftime(buffer, sizeof(buffer), TIME_FMT_STR_24H, tick_time);
-        } else {
+        }
+        else
+        {
             // 12 hour format
             strftime(buffer, sizeof(buffer), TIME_FMT_STR_12H, tick_time);
         }
@@ -644,7 +643,7 @@ void update_time(struct tm *tick_time) {
 #endif /* DEBUG_TIME */
 
 #ifdef REMOVE_LEADING_ZERO_FROM_TIME
-    if(clock_is_24h_style() == false)
+    if (clock_is_24h_style() == false)
     {
         if (buffer[0] == '0' || buffer[0] == ' ')
         {
@@ -678,15 +677,16 @@ void update_time(struct tm *tick_time) {
 }
 #endif /* NO_TEXT_TIME_LAYER */
 
-void main_window_load(Window *window) {
+void main_window_load(Window *window)
+{
     window_set_background_color(window, background_color);
 
 #ifdef BG_IMAGE
-    #ifdef BG_IMAGE_GRECT
-        setup_bg_image(window, BG_IMAGE, BG_IMAGE_GRECT);
-    #else /* BG_IMAGE_GRECT */
-        setup_bg_image(window, BG_IMAGE, GRectZero);
-    #endif /* BG_IMAGE_GRECT */
+#ifdef BG_IMAGE_GRECT
+    setup_bg_image(window, BG_IMAGE, BG_IMAGE_GRECT);
+#else  /* BG_IMAGE_GRECT */
+    setup_bg_image(window, BG_IMAGE, GRectZero);
+#endif /* BG_IMAGE_GRECT */
 #endif /* BG_IMAGE */
 
 #ifdef FONT_NAME
@@ -724,7 +724,7 @@ void main_window_load(Window *window) {
 
     /* Make sure the time is displayed from the start */
     // Get a tm structure
-    time_t    temp = time(NULL);
+    time_t temp = time(NULL);
     struct tm *tick_time = localtime(&temp);
     update_time(tick_time);
 
@@ -734,7 +734,8 @@ void main_window_load(Window *window) {
 #endif /* NO_BATTERY */
 }
 
-void main_window_unload(Window *window) {
+void main_window_unload(Window *window)
+{
 
 #ifdef QUIET_TIME_IMAGE
     cleanup_quiet_time();
@@ -777,26 +778,29 @@ void main_window_unload(Window *window) {
 #endif
 }
 
-void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
+void tick_handler(struct tm *tick_time, TimeUnits units_changed)
+{
     update_time(tick_time);
 }
 
 #ifdef DEBUG_TIME
-void debug_tick_handler(struct tm *tick_time, TimeUnits units_changed) {
+void debug_tick_handler(struct tm *tick_time, TimeUnits units_changed)
+{
     update_time(tick_time);
 }
 #endif /* DEBUG_TIME */
 
-void deinit() {
+void deinit()
+{
     // Destroy Window
     window_destroy(main_window);
 }
 
 void in_recv_handler(DictionaryIterator *iterator, void *context)
 {
-    Tuple *t=NULL;
-    bool wrote_config=false;
-    bool custom_wrote_config=false;
+    Tuple *t = NULL;
+    bool wrote_config = false;
+    bool custom_wrote_config = false;
 
     /* NOTE if new entries are added, increase MAX_MESSAGE_SIZE_OUT macro */
 
@@ -818,8 +822,8 @@ void in_recv_handler(DictionaryIterator *iterator, void *context)
     if (t)
     {
         APP_LOG(APP_LOG_LEVEL_DEBUG, "got MESSAGE_KEY_VIBRATE_ON_DISCONNECT");
-        config_time_vib_on_disconnect = (bool)t->value->int32;  /* this doesn't feel correct... */
-        APP_LOG(APP_LOG_LEVEL_INFO, "Persisting vib_on_disconnect: %d", (int) config_time_vib_on_disconnect);
+        config_time_vib_on_disconnect = (bool)t->value->int32; /* this doesn't feel correct... */
+        APP_LOG(APP_LOG_LEVEL_INFO, "Persisting vib_on_disconnect: %d", (int)config_time_vib_on_disconnect);
         persist_write_bool(MESSAGE_KEY_VIBRATE_ON_DISCONNECT, config_time_vib_on_disconnect);
         wrote_config = true;
     }
@@ -853,9 +857,9 @@ void in_recv_handler(DictionaryIterator *iterator, void *context)
         // and mark dirty is called (forgets to then repaint other stuff)
         if (battery_layer)
         {
-            #ifndef NO_BATTERY
+#ifndef NO_BATTERY
             handle_battery(battery_state_service_peek());
-            #endif /* NO_BATTERY */
+#endif /* NO_BATTERY */
         }
         APP_LOG(APP_LOG_LEVEL_DEBUG, "TIME COLOR DONE");
     }
@@ -873,9 +877,9 @@ void in_recv_handler(DictionaryIterator *iterator, void *context)
 
 void wipe_config()
 {
-    (void) persist_delete(MESSAGE_KEY_TIME_COLOR);
-    (void) persist_delete(MESSAGE_KEY_BACKGROUND_COLOR);
-    (void) persist_delete(MESSAGE_KEY_VIBRATE_ON_DISCONNECT);
+    (void)persist_delete(MESSAGE_KEY_TIME_COLOR);
+    (void)persist_delete(MESSAGE_KEY_BACKGROUND_COLOR);
+    (void)persist_delete(MESSAGE_KEY_VIBRATE_ON_DISCONNECT);
 }
 
 int get_major_app_version()
@@ -894,15 +898,15 @@ void init()
 
     major_version = get_major_app_version();
     APP_LOG(APP_LOG_LEVEL_INFO, "get_major_app_version: %d", major_version);
-    
+
     if (persist_exists(MESSAGE_KEY_MAJOR_VERSION))
     {
         int stored_major_version = persist_read_int(MESSAGE_KEY_MAJOR_VERSION);
 
-        if(stored_major_version > major_version)
+        if (stored_major_version > major_version)
         {
             /* Upgrade logic goes here */
-            wipe_config();  // Quick and dirty
+            wipe_config(); // Quick and dirty
         }
         /*
         ** Minor version bumps are assumed to be settings compatible
@@ -932,17 +936,16 @@ void init()
     if (persist_exists(MESSAGE_KEY_VIBRATE_ON_DISCONNECT))
     {
         config_time_vib_on_disconnect = persist_read_bool(MESSAGE_KEY_VIBRATE_ON_DISCONNECT);
-        APP_LOG(APP_LOG_LEVEL_INFO, "Read vib_on_disconnect: %d", (int) config_time_vib_on_disconnect);
+        APP_LOG(APP_LOG_LEVEL_INFO, "Read vib_on_disconnect: %d", (int)config_time_vib_on_disconnect);
     }
 
     // Create main Window element and assign to pointer
     main_window = window_create();
 
     // Set handlers to manage the elements inside the Window
-    window_set_window_handlers(main_window, (WindowHandlers) {
-                                   .load = MAIN_WINDOW_LOAD,
-                                   .unload = MAIN_WINDOW_UNLOAD
-                               });
+    window_set_window_handlers(main_window, (WindowHandlers){
+                                                .load = MAIN_WINDOW_LOAD,
+                                                .unload = MAIN_WINDOW_UNLOAD});
 
     // Show the Window on the watch, with animated=true
     window_stack_push(main_window, true);
@@ -950,35 +953,35 @@ void init()
     /* Register events; TickTimerService, Battery */
 #ifdef TIME_MACHINE
     time_t now = time(NULL);
-    struct tm* time_machine_start = localtime(&now);
+    struct tm *time_machine_start = localtime(&now);
 
     // Override start time to midnight, (local time)
     time_machine_start->tm_hour = time_machine_start->tm_min = 0;
 
-    time_machine_init(time_machine_start, TIME_MACHINE_MINUTES, 1000);  // accelerate minutes to seconds
-    //time_machine_init(time_machine_start, TIME_MACHINE_HOURS, 1000);  // accelerate hours to seconds
+    time_machine_init(time_machine_start, TIME_MACHINE_MINUTES, 1000); // accelerate minutes to seconds
+    // time_machine_init(time_machine_start, TIME_MACHINE_HOURS, 1000);  // accelerate hours to seconds
     time_machine_tick_timer_service_subscribe(TICK_HANDLER_INTERVAL, TICK_HANDLER);
 #else
     tick_timer_service_subscribe(TICK_HANDLER_INTERVAL, TICK_HANDLER);
 #endif
 #ifdef DEBUG_TIME
-    #ifndef DEBUG_TIME_SCREENSHOT
-        tick_timer_service_subscribe(SECOND_UNIT, DEBUG_TICK_HANDLER);
-    #endif /* DEBUG_TIME_SCREENSHOT */
+#ifndef DEBUG_TIME_SCREENSHOT
+    tick_timer_service_subscribe(SECOND_UNIT, DEBUG_TICK_HANDLER);
+#endif /* DEBUG_TIME_SCREENSHOT */
 #endif /* DEBUG_TIME */
 
     /* TODO use AppSync instead? */
     app_message_register_inbox_received(in_recv_handler);
 #ifdef MAX_MESSAGE_SIZES
     app_message_open(MAX_MESSAGE_SIZE_IN, MAX_MESSAGE_SIZE_OUT);
-#else /* MAX_MESSAGE_INBOX_SIZE */
+#else  /* MAX_MESSAGE_INBOX_SIZE */
     app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
 #endif /* MAX_MESSAGE_INBOX_SIZE */
 }
 
-
 #ifdef USE_GENERIC_MAIN
-int main(void) {
+int main(void)
+{
     init();
     app_event_loop();
     deinit();

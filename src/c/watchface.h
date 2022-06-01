@@ -3,24 +3,24 @@
 #include "watch_config.h"
 
 #ifdef USE_TIME_MACHINE
-    #include <pebble-time-machine/pebble-time-machine.h>
+#include <pebble-time-machine/pebble-time-machine.h>
 #endif
 
 #ifndef USE_MAX_MESSAGE_SIZE
-    /*
-    ** framework expects ONLY the three items above
-    ** pebble-js-app.js sanitizes values and
-    ** max length is about 90 bytes incoming, e.g.:
-    **    {"KEY_TIME_COLOR":16777215,"KEY_BACKGROUND_COLOR":16777215,"KEY_VIBRATE_ON_DISCONNECT":0}
-    ** Setting accurate max sizes avoids warnings:
-    **  [INFO] essage_outbox.c:49: app_message_open() called with app_message_outbox_size_maximum().
-    **  [INFO] essage_outbox.c:52: This consumes 8200 bytes of heap memory, potentially more in the future!
-    **  [INFO] message_inbox.c:13: app_message_open() called with app_message_inbox_size_maximum().
-    **  [INFO] message_inbox.c:16: This consumes 8200 bytes of heap memory, potentially more in the future!    
-    */
-    #define MAX_MESSAGE_SIZES
-    #define MAX_MESSAGE_SIZE_IN 200
-    #define MAX_MESSAGE_SIZE_OUT 0
+/*
+** framework expects ONLY the three items above
+** pebble-js-app.js sanitizes values and
+** max length is about 90 bytes incoming, e.g.:
+**    {"KEY_TIME_COLOR":16777215,"KEY_BACKGROUND_COLOR":16777215,"KEY_VIBRATE_ON_DISCONNECT":0}
+** Setting accurate max sizes avoids warnings:
+**  [INFO] essage_outbox.c:49: app_message_open() called with app_message_outbox_size_maximum().
+**  [INFO] essage_outbox.c:52: This consumes 8200 bytes of heap memory, potentially more in the future!
+**  [INFO] message_inbox.c:13: app_message_open() called with app_message_inbox_size_maximum().
+**  [INFO] message_inbox.c:16: This consumes 8200 bytes of heap memory, potentially more in the future!
+*/
+#define MAX_MESSAGE_SIZES
+#define MAX_MESSAGE_SIZE_IN 200
+#define MAX_MESSAGE_SIZE_OUT 0
 #endif
 
 #ifndef BLUETOOTH_DISCONNECTED_STR
@@ -33,28 +33,28 @@
 ** https://developer.getpebble.com/docs/c/Standard_C/Time/#strftime
 ** See http://www.gnu.org/software/emacs/manual/html_node/elisp/Time-Parsing.html for more details
 */
-#define DATE_FMT_STR "%a, %d %b"  /* TODO review %d for day */
-#define MAX_DATE_STR "Thu, 00 Aug"  /* if custom version of DATE_FMT_STR is set, MAX_DATE_STR  needs to be updated too */
-#endif /* DATE_FMT_STR */
+#define DATE_FMT_STR "%a, %d %b"   /* TODO review %d for day */
+#define MAX_DATE_STR "Thu, 00 Aug" /* if custom version of DATE_FMT_STR is set, MAX_DATE_STR  needs to be updated too */
+#endif                             /* DATE_FMT_STR */
 
 #ifndef TIME_FMT_STR_12H
-    /*
-    ** See https://sourceware.org/newlib/libc.html#strftime
-    ** Assume 24h not set either
-    ** Examples:
-    **    24 Hour: "%H:%M" == "%R"
-    **    12 Hour: "%l:%M" NOTE leading space for hour. NOTE requires font to have a space character
-    **             Also see REMOVE_LEADING_ZERO_FROM_TIME
-    */
-    #define TIME_FMT_STR_24H "%R"
-    #define TIME_FMT_STR_12H "%I:%M"  // produces leading zero for both hour and minute
-    #define MAX_TIME_STR "00:00"
+/*
+** See https://sourceware.org/newlib/libc.html#strftime
+** Assume 24h not set either
+** Examples:
+**    24 Hour: "%H:%M" == "%R"
+**    12 Hour: "%l:%M" NOTE leading space for hour. NOTE requires font to have a space character
+**             Also see REMOVE_LEADING_ZERO_FROM_TIME
+*/
+#define TIME_FMT_STR_24H "%R"
+#define TIME_FMT_STR_12H "%I:%M" // produces leading zero for both hour and minute
+#define MAX_TIME_STR "00:00"
 #endif /* TIME_FMT_STR_24H */
 
 #ifndef BAT_FMT_STR
 #define BAT_FMT_STR "Bat: %d%%"
-#endif /* BAT_FMT_STR */
-#define MAX_BAT_STR "Bat: ??%"  // When Battery is 100, the percent symbol is deliberately not shown (buffer full/truncated)
+#endif                         /* BAT_FMT_STR */
+#define MAX_BAT_STR "Bat: ??%" // When Battery is 100, the percent symbol is deliberately not shown (buffer full/truncated)
 
 #ifndef FONT_BT_SYSTEM_NAME
 #define FONT_BT_SYSTEM_NAME FONT_KEY_GOTHIC_18
@@ -127,7 +127,7 @@
 #define MAIN_WINDOW_UNLOAD main_window_unload
 #endif /* MAIN_WINDOW_UNLOAD */
 
-extern Window    *main_window;
+extern Window *main_window;
 #ifndef NO_TEXT_TIME_LAYER
 extern TextLayer *time_layer;
 #endif /* NO_TEXT_TIME_LAYER */
@@ -140,15 +140,15 @@ extern Layer *battery_layer;
 #endif /* DRAW_BATTERY */
 extern TextLayer *bluetooth_tlayer;
 
-extern GFont       time_font;
+extern GFont time_font;
 extern BitmapLayer *background_layer;
-extern GBitmap     *background_bitmap;
+extern GBitmap *background_bitmap;
 /* For colors, see http://developer.getpebble.com/tools/color-picker/#0000FF */
-extern GColor       time_color;  /* NOTE used for date too */
-extern GColor       background_color;
-extern int          config_time_color;
-extern int          config_background_color;
-extern bool         config_time_vib_on_disconnect;
+extern GColor time_color; /* NOTE used for date too */
+extern GColor background_color;
+extern int config_time_color;
+extern int config_background_color;
+extern bool config_time_vib_on_disconnect;
 
 extern int last_day;
 extern bool bluetooth_state;
@@ -180,26 +180,26 @@ extern void SETUP_TIME(Window *window);
 extern bool CUSTOM_IN_RECV_HANDLER(DictionaryIterator *iterator, void *context);
 
 #ifndef PBL_HEALTH
-    // Ensure platforms without health do not accidentally attempt to build using health api
-    #undef USE_HEALTH
+// Ensure platforms without health do not accidentally attempt to build using health api
+#undef USE_HEALTH
 #endif /* PBL_HEALTH */
 
 #if defined(PBL_HEALTH)
 extern TextLayer *health_tlayer;
 
 #ifndef HEALTH_ALIGN
-    #define HEALTH_ALIGN GTextAlignmentCenter
+#define HEALTH_ALIGN GTextAlignmentCenter
 #endif
 
 #ifndef HEALTH_FMT_STR
-    #define HEALTH_FMT_STR "%d steps today"
-    #define MAX_HEALTH_STR "123456 steps today"   /* update to match HEALTH_FMT_STR */
-#endif /* HEALTH_FMT_STR */
+#define HEALTH_FMT_STR "%d steps today"
+#define MAX_HEALTH_STR "123456 steps today" /* update to match HEALTH_FMT_STR */
+#endif                                      /* HEALTH_FMT_STR */
 
 #ifndef HEALTH_POS
-    #ifndef USE_HEALTH
-        #define HEALTH_POS GRect(50, 50, 144, 168)
-    #endif /* USE_HEALTH */
+#ifndef USE_HEALTH
+#define HEALTH_POS GRect(50, 50, 144, 168)
+#endif /* USE_HEALTH */
 #endif /* HEALTH_POS */
 
 void setup_health(Window *window);
