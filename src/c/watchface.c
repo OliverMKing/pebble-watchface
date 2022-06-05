@@ -811,6 +811,7 @@ void main_window_unload(Window *window)
 void tick_handler(struct tm *tick_time, TimeUnits units_changed)
 {
     int day_in_year = tick_time->tm_yday;
+    int current_hour = tick_time->tm_hour;
 
     // shuffle images based on day of year (will only happen once a day)
     if (day != day_in_year)
@@ -836,20 +837,23 @@ void tick_handler(struct tm *tick_time, TimeUnits units_changed)
     }
 
     // display different image based on hour
-    if (background_layer)
+    if (hour != current_hour)
     {
-        int hour = tick_time->tm_hour;
-        int minute = tick_time->tm_min;
-        int image_num = minute % NUM_IMAGES;
-        APP_LOG(APP_LOG_LEVEL_DEBUG, "Setting new background image number %d", image_num);
-        if (background_bitmap)
+        hour = current_hour;
+
+        if (background_layer)
         {
-            gbitmap_destroy(background_bitmap);
+            int image_num = hour % NUM_IMAGES;
+            APP_LOG(APP_LOG_LEVEL_DEBUG, "Setting new background image number %d", image_num);
+            if (background_bitmap)
+            {
+                gbitmap_destroy(background_bitmap);
+            }
+            background_bitmap = gbitmap_create_with_resource(bg_images[image_num]);
+            APP_LOG(APP_LOG_LEVEL_DEBUG, "set bitmap");
+            bitmap_layer_set_bitmap(background_layer, background_bitmap);
+            APP_LOG(APP_LOG_LEVEL_DEBUG, "set layer");
         }
-        background_bitmap = gbitmap_create_with_resource(bg_images[image_num]);
-        APP_LOG(APP_LOG_LEVEL_DEBUG, "set bitmap");
-        bitmap_layer_set_bitmap(background_layer, background_bitmap);
-        APP_LOG(APP_LOG_LEVEL_DEBUG, "set layer");
     }
 
     update_time(tick_time);
