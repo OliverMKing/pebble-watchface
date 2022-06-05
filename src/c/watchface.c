@@ -18,12 +18,15 @@ extern const PebbleProcessInfo __pbl_app_info; // ONLY for get_major_app_version
 uint32_t bg_images[] = {
     RESOURCE_ID_IMAGE_BG1,
     RESOURCE_ID_IMAGE_BG2,
+    RESOURCE_ID_IMAGE_BG3,
+    RESOURCE_ID_IMAGE_BG4,
+    RESOURCE_ID_IMAGE_BG5,
 };
-const int NUM_IMAGES = sizeof(bg_images) / sizeof(bg_images[1]);
-int day = -1; // initialized to day that will never exist
+const int NUM_IMAGES = sizeof(bg_images) / sizeof(bg_images[0]);
+int day = -1;  // initialized to day that will never exist
+int hour = -1; // initalized to hour that will never exist
 
 Window *main_window = NULL;
-Window *bg_window = NULL;
 #ifndef NO_TEXT_TIME_LAYER
 TextLayer *time_layer = NULL;
 #endif /* NO_TEXT_TIME_LAYER */
@@ -527,8 +530,6 @@ void cleanup_date()
 */
 void setup_bg_image(Window *window, uint32_t resource_id, GRect bounds)
 {
-    bg_window = window;
-
     // Create GBitmap, then set to created BitmapLayer
     background_bitmap = gbitmap_create_with_resource(resource_id);
 
@@ -572,8 +573,6 @@ void cleanup_bg_image()
 */
 void setup_bt_image(Window *window, uint32_t resource_id, GRect bounds)
 {
-    bg_window = window;
-
     // Create GBitmap, then set to created BitmapLayer
     bluetooth_disconnect_bitmap = gbitmap_create_with_resource(resource_id);
 
@@ -818,21 +817,20 @@ void tick_handler(struct tm *tick_time, TimeUnits units_changed)
     }
 
     // display different image based on hour
-    int hour = tick_time->tm_hour;
-    int minute = tick_time->tm_min;
-
-    if (bg_window != NULL)
+    if (background_layer)
     {
-        APP_LOG(APP_LOG_LEVEL_DEBUG, "Setting background image");
-
-        // destroy previous background
-        cleanup_bg_image();
-        // draw new background
-#ifdef BG_IMAGE_GRECT
-        setup_bg_image(bg_window, bg_images[minute % NUM_IMAGES], BG_IMAGE_GRECT);
-#else  /* BG_IMAGE_GRECT */
-        setup_bg_image(bg_window, bg_images[minute % NUM_IMAGES], GRectZero);
-#endif /* BG_IMAGE_GRECT */
+        int hour = tick_time->tm_hour;
+        int minute = tick_time->tm_min;
+        int image_num = minute % NUM_IMAGES;
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "Setting new background image number %d", image_num);
+        if (background_bitmap)
+        {
+            gbitmap_destroy(background_bitmap);
+        }
+        background_bitmap = gbitmap_create_with_resource(bg_images[image_num]);
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "set bitmap");
+        bitmap_layer_set_bitmap(background_layer, background_bitmap);
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "set layer");
     }
 
     update_time(tick_time);

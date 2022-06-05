@@ -29,6 +29,21 @@
           "file": "images/background2.png",
           "name": "IMAGE_BG2",
           "type": "png"
+        },
+        {
+          "file": "images/background3.png",
+          "name": "IMAGE_BG3",
+          "type": "png"
+        },
+        {
+          "file": "images/background4.png",
+          "name": "IMAGE_BG4",
+          "type": "png"
+        },
+        {
+          "file": "images/background5.png",
+          "name": "IMAGE_BG5",
+          "type": "png"
         }
       ]
     },
