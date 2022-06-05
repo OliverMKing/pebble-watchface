@@ -15,7 +15,15 @@ extern const PebbleProcessInfo __pbl_app_info; // ONLY for get_major_app_version
 #endif /* GColorFromHEX */
 #endif /* PBL_BW */
 
+uint32_t bg_images[] = {
+    RESOURCE_ID_IMAGE_BG1,
+    RESOURCE_ID_IMAGE_BG2,
+};
+const int NUM_IMAGES = sizeof(bg_images) / sizeof(bg_images[1]);
+int day = -1; // initialized to day that will never exist
+
 Window *main_window = NULL;
+Window *bg_window = NULL;
 #ifndef NO_TEXT_TIME_LAYER
 TextLayer *time_layer = NULL;
 #endif /* NO_TEXT_TIME_LAYER */
@@ -519,6 +527,8 @@ void cleanup_date()
 */
 void setup_bg_image(Window *window, uint32_t resource_id, GRect bounds)
 {
+    bg_window = window;
+
     // Create GBitmap, then set to created BitmapLayer
     background_bitmap = gbitmap_create_with_resource(resource_id);
 
@@ -562,6 +572,8 @@ void cleanup_bg_image()
 */
 void setup_bt_image(Window *window, uint32_t resource_id, GRect bounds)
 {
+    bg_window = window;
+
     // Create GBitmap, then set to created BitmapLayer
     bluetooth_disconnect_bitmap = gbitmap_create_with_resource(resource_id);
 
@@ -780,6 +792,49 @@ void main_window_unload(Window *window)
 
 void tick_handler(struct tm *tick_time, TimeUnits units_changed)
 {
+    int day_in_year = tick_time->tm_yday;
+
+    // shuffle images based on day of year (will only happen once a day)
+    if (day != day_in_year)
+    {
+        // seed
+        day = day_in_year;
+        srand(day);
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "Shuffling images on seed %d", day);
+
+        // shuffle
+        if (NUM_IMAGES > 1)
+        {
+            int i;
+            for (i = NUM_IMAGES - 1; i > 0; i--)
+            {
+                int j = rand() % (i + 1);
+
+                uint32_t temp = bg_images[j];
+                bg_images[j] = bg_images[i];
+                bg_images[i] = temp;
+            }
+        }
+    }
+
+    // display different image based on hour
+    int hour = tick_time->tm_hour;
+    int minute = tick_time->tm_min;
+
+    if (bg_window != NULL)
+    {
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "Setting background image");
+
+        // destroy previous background
+        cleanup_bg_image();
+        // draw new background
+#ifdef BG_IMAGE_GRECT
+        setup_bg_image(bg_window, bg_images[minute % NUM_IMAGES], BG_IMAGE_GRECT);
+#else  /* BG_IMAGE_GRECT */
+        setup_bg_image(bg_window, bg_images[minute % NUM_IMAGES], GRectZero);
+#endif /* BG_IMAGE_GRECT */
+    }
+
     update_time(tick_time);
 }
 

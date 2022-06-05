@@ -24,6 +24,11 @@
           "file": "images/background1.png",
           "name": "IMAGE_BG1",
           "type": "png"
+        },
+        {
+          "file": "images/background2.png",
+          "name": "IMAGE_BG2",
+          "type": "png"
         }
       ]
     },
