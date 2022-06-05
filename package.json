@@ -44,6 +44,101 @@
           "file": "images/background5.png",
           "name": "IMAGE_BG5",
           "type": "png"
+        },
+        {
+          "file": "images/background6.png",
+          "name": "IMAGE_BG6",
+          "type": "png"
+        },
+        {
+          "file": "images/background7.png",
+          "name": "IMAGE_BG7",
+          "type": "png"
+        },
+        {
+          "file": "images/background8.png",
+          "name": "IMAGE_BG8",
+          "type": "png"
+        },
+        {
+          "file": "images/background9.png",
+          "name": "IMAGE_BG9",
+          "type": "png"
+        },
+        {
+          "file": "images/background10.png",
+          "name": "IMAGE_BG10",
+          "type": "png"
+        },
+        {
+          "file": "images/background11.png",
+          "name": "IMAGE_BG11",
+          "type": "png"
+        },
+        {
+          "file": "images/background12.png",
+          "name": "IMAGE_BG12",
+          "type": "png"
+        },
+        {
+          "file": "images/background13.png",
+          "name": "IMAGE_BG13",
+          "type": "png"
+        },
+        {
+          "file": "images/background14.png",
+          "name": "IMAGE_BG14",
+          "type": "png"
+        },
+        {
+          "file": "images/background15.png",
+          "name": "IMAGE_BG15",
+          "type": "png"
+        },
+        {
+          "file": "images/background16.png",
+          "name": "IMAGE_BG16",
+          "type": "png"
+        },
+        {
+          "file": "images/background17.png",
+          "name": "IMAGE_BG17",
+          "type": "png"
+        },
+        {
+          "file": "images/background18.png",
+          "name": "IMAGE_BG18",
+          "type": "png"
+        },
+        {
+          "file": "images/background19.png",
+          "name": "IMAGE_BG19",
+          "type": "png"
+        },
+        {
+          "file": "images/background20.png",
+          "name": "IMAGE_BG20",
+          "type": "png"
+        },
+        {
+          "file": "images/background21.png",
+          "name": "IMAGE_BG21",
+          "type": "png"
+        },
+        {
+          "file": "images/background22.png",
+          "name": "IMAGE_BG22",
+          "type": "png"
+        },
+        {
+          "file": "images/background23.png",
+          "name": "IMAGE_BG23",
+          "type": "png"
+        },
+        {
+          "file": "images/background24.png",
+          "name": "IMAGE_BG24",
+          "type": "png"
         }
       ]
     },
