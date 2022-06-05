@@ -7,7 +7,7 @@
 #undef DEBUG_TIME
 //#define USE_TIME_MACHINE  // NOTE mixing with DEBUG_TIME doesn't make sense. Requires update to package.json for dependencies
 
-#define BG_IMAGE RESOURCE_ID_IMAGE_BG1
+#define BG_IMAGE RESOURCE_ID_IMAGE_BG0
 
 // Show step count using builtin code
 // #define USE_HEALTH

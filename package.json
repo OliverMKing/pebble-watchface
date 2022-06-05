@@ -21,6 +21,11 @@
     "resources": {
       "media": [
         {
+          "file": "images/background0.png",
+          "name": "IMAGE_BG0",
+          "type": "png"
+        },
+        {
           "file": "images/background1.png",
           "name": "IMAGE_BG1",
           "type": "png"
