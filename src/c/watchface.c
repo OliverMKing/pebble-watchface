@@ -808,6 +808,11 @@ void main_window_unload(Window *window)
 #endif
 }
 
+int cmp_images(const void *a, const void *b)
+{
+    return (*(int *)a - *(int *)b);
+}
+
 void tick_handler(struct tm *tick_time, TimeUnits units_changed)
 {
     int day_in_year = tick_time->tm_yday;
@@ -816,6 +821,10 @@ void tick_handler(struct tm *tick_time, TimeUnits units_changed)
     // shuffle images based on day of year (will only happen once a day)
     if (day != day_in_year)
     {
+        // sort array so always starts in same order
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "Sorting images");
+        qsort(bg_images, NUM_IMAGES, sizeof(bg_images[0]), cmp_images);
+
         // seed
         day = day_in_year;
         srand(day);
