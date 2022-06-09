@@ -40,6 +40,7 @@ uint32_t bg_images[] = {
     RESOURCE_ID_IMAGE_BG22,
     RESOURCE_ID_IMAGE_BG23,
     RESOURCE_ID_IMAGE_BG24,
+    RESOURCE_ID_IMAGE_BG25,
 };
 const int NUM_IMAGES = sizeof(bg_images) / sizeof(bg_images[0]);
 int day = -1;  // initialized to day that will never exist

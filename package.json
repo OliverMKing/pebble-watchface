@@ -144,6 +144,11 @@
           "file": "images/background24.png",
           "name": "IMAGE_BG24",
           "type": "png"
+        },
+        {
+          "file": "images/background25.png",
+          "name": "IMAGE_BG25",
+          "type": "png"
         }
       ]
     },
